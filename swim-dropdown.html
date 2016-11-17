@@ -1,0 +1,110 @@
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../paper-dropdown-menu/paper-dropdown-menu.html">
+<link rel="import" href="../paper-listbox/paper-listbox.html">
+<link rel="import" href="../paper-item/paper-item.html">
+<link rel="import" href="../swim-states/swim-states.html">
+<script src="../lodash/lodash.js"></script>
+<script src="https://repo.swim.it/swim/recon-0.3.9.js"></script>
+<script src="https://repo.swim.it/swim/swim-client-0.4.5.js"></script>
+
+<!--
+`swim-dropdown`
+Dropdown
+
+@demo demo/index.html 
+-->
+
+<dom-module id="swim-dropdown">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+      paper-item {
+        font-size: 13px;
+      }
+    </style>
+
+    <paper-dropdown-menu label="{{placeholder}}" no-label-float="true" on-iron-select="_itemSelected">
+      <paper-listbox class="dropdown-content">
+        <template is="dom-repeat" items="{{list}}">
+          <paper-item>{{item.name}}</paper-item>
+        </template>
+
+      </paper-listbox>
+    </paper-dropdown-menu>
+
+    <swim-states></swim-states>
+
+
+  </template>
+
+  <script>
+    Polymer({
+
+      is: 'swim-dropdown',
+
+      properties: {
+        placeholder: String,
+        isList: {
+          type: Boolean,
+          value: true,
+        },
+        hostUri: String,
+        node: String,
+        lane: String,
+        key: String
+
+      },
+
+      _itemSelected : function(e) {
+
+        /** For the swimMap._fitBounds() the bounding box array is [[west, south],[east, north]] */
+
+        const swimStates = document.querySelector('swim-states');
+        let statesList = swimStates.statesList();
+        let selectedItem = e.target.selectedItem;
+
+        if (selectedItem) {
+          let state = _.find(statesList, function (obj) {
+            return obj.state === selectedItem.innerText;
+          });
+          if (state) {
+            swimMap._fitBounds(state.boundingbox);
+          } else {
+            if (selectedItem.innerText === 'California-Northern') {
+              swimMap._flyTo({
+                center: [-122.44, 37.74],
+                zoom: 12
+              });
+            } else if (selectedItem.innerText === 'California-Southern') {
+              swimMap._flyTo({
+                center: [-118.25, 34.02],
+                zoom: 10
+              });
+            } else if (selectedItem.innerText === 'District of Columbia') {
+              swimMap._fitBounds([[-77.119759, 38.791645],[-76.909393, 38.995548]]);
+            }
+          }
+        }
+
+      },
+
+      ready: function () {
+        const _self = this;
+        _self.list = [];
+        swim.downlink()
+          .host(_self.hostUri)
+          .node(_self.node)
+          .lane(_self.lane)
+          .onEvent(function (message) { // automatically called with $scope.$apply
+            _self.push('list', {
+              name: message.body[_self.key]
+            });
+          })
+          .sync();
+      }
+
+    });
+  </script>
+</dom-module>
