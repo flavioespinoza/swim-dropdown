@@ -14,13 +14,30 @@
 
     <style is="custom-style" include="demo-pages-shared-styles">
     </style>
+    <style>
+      .centered:not([style-scope]):not(.style-scope) {
+        max-width: 800px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+      .info {
+        margin-bottom: 12px;
+      }
+    </style>
   </head>
   <body>
     <div class="vertical-section-container centered">
       <h3>Basic swim-dropdown demo</h3>
       <demo-snippet>
         <template>
-          <swim-dropdown></swim-dropdown>
+          <swim-dropdown placeholder="Select region"
+                         is-list="true"
+                         host-uri="ws://city.swim.services"
+                         node="/country/us"
+                         lane="country/regions"
+                         key="@region">
+
+          </swim-dropdown>
         </template>
       </demo-snippet>
     </div>
