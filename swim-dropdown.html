@@ -3,6 +3,7 @@
 <link rel="import" href="../paper-listbox/paper-listbox.html">
 <link rel="import" href="../paper-item/paper-item.html">
 <link rel="import" href="../swim-states/swim-states.html">
+<link rel="import" href="../swim-map/swim-map.html">
 <script src="../lodash/lodash.js"></script>
 <script src="https://repo.swim.it/swim/recon-0.3.9.js"></script>
 <script src="https://repo.swim.it/swim/swim-client-0.4.5.js"></script>
@@ -51,6 +52,7 @@ Example:
   </template>
 
   <script>
+
     Polymer({
 
       is: 'swim-dropdown',
@@ -73,31 +75,37 @@ Example:
         /** For the swimMap._fitBounds() the bounding box array is [[west, south],[east, north]] */
 
         const swimStates = document.querySelector('swim-states');
+
         let statesList = swimStates.statesList();
         let selectedItem = e.target.selectedItem;
+        let innerText = selectedItem.innerText.toLowerCase();
 
-        if (selectedItem) {
-          let state = _.find(statesList, function (obj) {
-            return obj.state === selectedItem.innerText;
-          });
-          if (state) {
-            swimMap._fitBounds(state.boundingbox);
-          } else {
-            if (selectedItem.innerText === 'California-Northern') {
-              swimMap._flyTo({
-                center: [-122.44, 37.74],
-                zoom: 12
-              });
-            } else if (selectedItem.innerText === 'California-Southern') {
-              swimMap._flyTo({
-                center: [-118.25, 34.02],
-                zoom: 10
-              });
-            } else if (selectedItem.innerText === 'District of Columbia') {
-              swimMap._fitBounds([[-77.119759, 38.791645],[-76.909393, 38.995548]]);
+          if (selectedItem) {
+            let state = _.find(statesList, function (obj) {
+              return obj.state === innerText;
+            });
+            if (state) {
+              let boundingBox = [
+                [state.bounding_box.west_longitude, state.bounding_box.south_latitude],
+                [state.bounding_box.east_longitude, state.bounding_box.north_latitude],
+              ];
+              swimMap._fitBounds(boundingBox);
+            } else {
+              if (innerText === 'California-Northern') {
+                swimMap._flyTo({
+                  center: [-122.44, 37.74],
+                  zoom: 12
+                });
+              } else if (innerText === 'California-Southern') {
+                swimMap._flyTo({
+                  center: [-118.25, 34.02],
+                  zoom: 10
+                });
+              } else if (innerText === 'District of Columbia') {
+                swimMap._fitBounds([[-77.119759, 38.791645],[-76.909393, 38.995548]]);
+              }
             }
           }
-        }
 
       },
 
