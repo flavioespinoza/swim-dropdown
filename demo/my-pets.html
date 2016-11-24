@@ -1,0 +1,38 @@
+<link rel="import" href="../../polymer/polymer.html">
+
+<!--
+`my-pets`
+pets list
+
+@demo demo/index.html
+-->
+
+<dom-module id="my-pets">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+    </style>
+    <h2>Hello [[prop1]]</h2>
+  </template>
+
+  <script>
+    Polymer({
+
+      is: 'my-pets',
+
+      properties: {
+        prop1: {
+          type: String,
+          value: 'my-pets',
+        }
+      },
+
+      getCustomList: function () {
+        return [{name: 'dog'}, {name: 'cat'}, {name: 'bird'}];
+      }
+
+    });
+  </script>
+</dom-module>

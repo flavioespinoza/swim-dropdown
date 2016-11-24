@@ -10,6 +10,7 @@
 
     <link rel="import" href="../../iron-demo-helpers/demo-pages-shared-styles.html">
     <link rel="import" href="../../iron-demo-helpers/demo-snippet.html">
+    <link rel="import" href="../demo/my-pets.html">
     <link rel="import" href="../swim-dropdown.html">
 
     <style is="custom-style" include="demo-pages-shared-styles">
@@ -27,19 +28,51 @@
   </head>
   <body>
     <div class="vertical-section-container centered">
-      <h3>Basic swim-dropdown demo</h3>
+      <h3>Swim dropdown using the Swim States web component</h3>
       <demo-snippet>
         <template>
-          <swim-dropdown placeholder="Select region"
-                         is-list="true"
-                         host-uri="ws://city.swim.services"
-                         node="/country/us"
-                         lane="country/regions"
-                         key="@region">
+          <swim-dropdown placeholder="Select state"
+                         host-uri="swim-states"
+                         type="list">
 
           </swim-dropdown>
         </template>
       </demo-snippet>
     </div>
+
+    <div class="vertical-section-container centered">
+      <h3>Swim Dropdown with Swim uri</h3>
+      <demo-snippet>
+        <template>
+          <swim-dropdown placeholder="Select region"
+                         host-uri="ws://city.swim.services"
+                         node="/country/us"
+                         lane="country/regions"
+                         key="@region"
+                         type="list">
+
+          </swim-dropdown>
+        </template>
+      </demo-snippet>
+    </div>
+
+    <div class="vertical-section-container centered">
+      <h3>Swim Dropdown with custom list</h3>
+      <demo-snippet>
+        <template>
+
+          <!-- NOTE: Your custom list must be a sibling of the swim-dropdown and have a unique class -->
+          <my-pets></my-pets>
+          <!-- NOTE: The host-uri attribute is the same as your custom list's unique class -->
+          <swim-dropdown placeholder="Select pet"
+                         host-uri="my-pets"
+                         type="custom">
+
+          </swim-dropdown>
+
+        </template>
+      </demo-snippet>
+    </div>
+
   </body>
 </html>

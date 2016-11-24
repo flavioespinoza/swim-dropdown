@@ -2,16 +2,21 @@
 <link rel="import" href="../paper-dropdown-menu/paper-dropdown-menu.html">
 <link rel="import" href="../paper-listbox/paper-listbox.html">
 <link rel="import" href="../paper-item/paper-item.html">
-<link rel="import" href="../swim-states/swim-states.html">
+
 <link rel="import" href="../swim-map/swim-map.html">
+<link rel="import" href="../swim-states/swim-states.html">
+
 <script src="../lodash/lodash.js"></script>
-<script src="https://repo.swim.it/swim/recon-0.3.9.js"></script>
-<script src="https://repo.swim.it/swim/swim-client-0.4.5.js"></script>
+<script src="../jquery/dist/jquery.js"></script>
+
+<script src="../swim-polymer/recon-0.3.9.js"></script>
+<script src="../swim-polymer/swim-client-0.4.5.js"></script>
+
 
 <!--
 ## swim-dropdown
 
-`swim-dropdown` Dropdown component for Swim services.
+`swim-dropdown` Dropdown component for Swim services or other Swim components.
 
 Example:
 
@@ -49,7 +54,6 @@ Example:
 
     <swim-states></swim-states>
 
-
   </template>
 
   <script>
@@ -67,62 +71,94 @@ Example:
         hostUri: String,
         node: String,
         lane: String,
+        type: String,
         key: String
 
       },
 
+      /** For the swimMap._fitBounds() the bounding box array is [[west, south],[east, north]] */
+
       _itemSelected : function(e) {
 
-        /** For the swimMap._fitBounds() the bounding box array is [[west, south],[east, north]] */
-
-        const swimStates = document.querySelector('swim-states');
-
-        let statesList = swimStates.statesList();
-        let selectedItem = e.target.selectedItem;
-        let innerText = selectedItem.innerText.toLowerCase();
+        const _self = this;
+        let selectedItem = e.target.selectedItem.innerText.toLowerCase();
 
           if (selectedItem) {
-            let state = _.find(statesList, function (obj) {
-              return obj.state === innerText;
-            });
-            if (state) {
-              let boundingBox = [
-                [state.bounding_box.west_longitude, state.bounding_box.south_latitude],
-                [state.bounding_box.east_longitude, state.bounding_box.north_latitude],
-              ];
-              swimMap._fitBounds(boundingBox);
-            } else {
-              if (innerText === 'California-Northern') {
-                swimMap._flyTo({
-                  center: [-122.44, 37.74],
-                  zoom: 12
-                });
-              } else if (innerText === 'California-Southern') {
-                swimMap._flyTo({
-                  center: [-118.25, 34.02],
-                  zoom: 10
-                });
-              } else if (innerText === 'District of Columbia') {
-                swimMap._fitBounds([[-77.119759, 38.791645],[-76.909393, 38.995548]]);
+            if (_self.type === 'map') {
+              let statesList = _self._getStates();
+              let state = _.find(statesList, function (obj) {
+                return obj.state === innerText;
+              });
+              if (state) {
+                let boundingBox = [
+                  [state.bounding_box.west_longitude, state.bounding_box.south_latitude],
+                  [state.bounding_box.east_longitude, state.bounding_box.north_latitude],
+                ];
+                if (_self.hostUri === 'swim-states') {
+
+                } else {
+                  swimMap._fitBounds(boundingBox);
+                }
+              } else {
+                if (innerText === 'California-Northern') {
+                  swimMap._flyTo({
+                    center: [-122.44, 37.74],
+                    zoom: 12
+                  });
+                } else if (innerText === 'California-Southern') {
+                  swimMap._flyTo({
+                    center: [-118.25, 34.02],
+                    zoom: 10
+                  });
+                } else if (innerText === 'District of Columbia') {
+                  swimMap._fitBounds([[-77.119759, 38.791645],[-76.909393, 38.995548]]);
+                }
               }
+            } else {
+              console.log('selectedItem', selectedItem);
             }
           }
 
       },
 
+      _getStates: function () {
+        const swimStates = this.$$('swim-states');
+        return swimStates.statesList();
+      },
+
+      _getCustomList: function (element) {
+        const customListElement = $(this).siblings(element)[0];
+        console.log('customListElement', customListElement);
+        return customListElement.getCustomList();
+      },
+
       ready: function () {
         const _self = this;
         _self.list = [];
-        swim.downlink()
-          .host(_self.hostUri)
-          .node(_self.node)
-          .lane(_self.lane)
-          .onEvent(function (message) { // automatically called with $scope.$apply
-            _self.push('list', {
-              name: message.body[_self.key]
-            });
-          })
-          .sync();
+        if (_self.type === 'custom') {
+          _self.list = _self._getCustomList(_self.hostUri)
+        } else {
+          let statesList = _self._getStates();
+          if (_self.hostUri === 'swim-states') {
+            _.each(statesList, function (obj) {
+              _self.push('list', {
+                name: _.startCase(obj.state)
+              });
+            })
+          } else {
+            swim.downlink()
+              .host(_self.hostUri)
+              .node(_self.node)
+              .lane(_self.lane)
+              .onEvent(function (message) {
+                _self.push('list', {
+                  name: message.body[_self.key]
+                });
+              })
+              .sync();
+          }
+        }
+
       }
 
     });
