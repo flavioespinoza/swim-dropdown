@@ -38,6 +38,7 @@ Example:
       :host {
         display: block;
       }
+
       paper-item {
         font-size: 13px;
       }
@@ -63,61 +64,67 @@ Example:
       is: 'swim-dropdown',
 
       properties: {
+
+        /** Placeholder text instucting user to select item. */
         placeholder: String,
-        isList: {
-          type: Boolean,
-          value: true,
-        },
+
+        /** Swim host uri - Example: "ws://city.swim.services" */
         hostUri: String,
+
+        /** Swim node - Example: "country/us" */
         node: String,
+
+        /** Swim lane - Example: "country/regions" */
         lane: String,
+
+        /** Options: "list", "map", "custom" */
         type: String,
+
+        /** Required when using a Swim uri to generate the list - Example: "@region" */
         key: String
 
       },
 
-      /** For the swimMap._fitBounds() the bounding box array is [[west, south],[east, north]] */
-
-      _itemSelected : function(e) {
+      _itemSelected: function (e) {
 
         const _self = this;
-        let selectedItem = e.target.selectedItem.innerText.toLowerCase();
+        let selectedItem = e.target.selectedItem.innerText;
 
-          if (selectedItem) {
-            if (_self.type === 'map') {
-              let statesList = _self._getStates();
-              let state = _.find(statesList, function (obj) {
-                return obj.state === innerText;
-              });
-              if (state) {
-                let boundingBox = [
-                  [state.bounding_box.west_longitude, state.bounding_box.south_latitude],
-                  [state.bounding_box.east_longitude, state.bounding_box.north_latitude],
-                ];
-                if (_self.hostUri === 'swim-states') {
+        if (selectedItem) {
+          if (_self.type === 'map') {
+            let statesList = _self._getStates();
+            let innerText = selectedItem.toLowerCase();
+            let state = _.find(statesList, function (obj) {
+              return obj.name === innerText;
+            });
+            if (state) {
+              /** For the swimMap._fitBounds() the bounding box array is [[west, south],[east, north]] */
 
-                } else {
-                  swimMap._fitBounds(boundingBox);
-                }
-              } else {
-                if (innerText === 'California-Northern') {
-                  swimMap._flyTo({
-                    center: [-122.44, 37.74],
-                    zoom: 12
-                  });
-                } else if (innerText === 'California-Southern') {
-                  swimMap._flyTo({
-                    center: [-118.25, 34.02],
-                    zoom: 10
-                  });
-                } else if (innerText === 'District of Columbia') {
-                  swimMap._fitBounds([[-77.119759, 38.791645],[-76.909393, 38.995548]]);
-                }
-              }
+              let boundingBox = [
+                [state.bounding_box.west_longitude, state.bounding_box.south_latitude],
+                [state.bounding_box.east_longitude, state.bounding_box.north_latitude],
+              ];
+              swimMap._fitBounds(boundingBox);
             } else {
-              console.log('selectedItem', selectedItem);
+              if (innerText === 'California-Northern') {
+                swimMap._flyTo({
+                  center: [-122.44, 37.74],
+                  zoom: 12
+                });
+              } else if (innerText === 'California-Southern') {
+                swimMap._flyTo({
+                  center: [-118.25, 34.02],
+                  zoom: 10
+                });
+              } else if (innerText === 'District of Columbia') {
+                swimMap._fitBounds([[-77.119759, 38.791645], [-76.909393, 38.995548]]);
+              }
             }
+          } else if (_self.type === 'custom') {
+            console.log('selectedItem', selectedItem);
+            _self._customListOnSelect(selectedItem);
           }
+        }
 
       },
 
@@ -129,7 +136,15 @@ Example:
       _getCustomList: function (element) {
         const customListElement = $(this).siblings(element)[0];
         console.log('customListElement', customListElement);
-        return customListElement.getCustomList();
+        let list = customListElement.getCustomList();
+        console.log('list', list);
+        return list;
+      },
+
+      _customListOnSelect: function (selectedItem) {
+        const _self = this;
+        const customListElement = $(_self).siblings(_self.hostUri)[0];
+        customListElement.onSelect(selectedItem);
       },
 
       ready: function () {
@@ -142,7 +157,7 @@ Example:
           if (_self.hostUri === 'swim-states') {
             _.each(statesList, function (obj) {
               _self.push('list', {
-                name: _.startCase(obj.state)
+                name: _.startCase(obj.name)
               });
             })
           } else {

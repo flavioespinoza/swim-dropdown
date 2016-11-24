@@ -1,78 +1,268 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
 
-    <title>swim-dropdown demo</title>
+  <title>swim-dropdown demo</title>
 
-    <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+  <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
 
-    <link rel="import" href="../../iron-demo-helpers/demo-pages-shared-styles.html">
-    <link rel="import" href="../../iron-demo-helpers/demo-snippet.html">
-    <link rel="import" href="../demo/my-pets.html">
-    <link rel="import" href="../swim-dropdown.html">
+  <link rel="import" href="../../iron-demo-helpers/demo-pages-shared-styles.html">
+  <link rel="import" href="../../iron-demo-helpers/demo-snippet.html">
+  <link rel="import" href="../demo/my-pets.html">
+  <link rel="import" href="../swim-dropdown.html">
 
-    <style is="custom-style" include="demo-pages-shared-styles">
-    </style>
-    <style>
-      .centered:not([style-scope]):not(.style-scope) {
-        max-width: 800px;
-        margin-left: auto;
-        margin-right: auto;
-      }
-      .info {
-        margin-bottom: 12px;
-      }
-    </style>
-  </head>
-  <body>
-    <div class="vertical-section-container centered">
-      <h3>Swim dropdown using the Swim States web component</h3>
-      <demo-snippet>
+  <style is="custom-style" include="demo-pages-shared-styles">
+  </style>
+  <style>
+    .centered:not([style-scope]):not(.style-scope) {
+      max-width: 800px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .info {
+      margin-bottom: 12px;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="vertical-section-container centered">
+  <h3>Swim Dropdown with Swim uri</h3>
+  <demo-snippet>
+    <template>
+      <swim-dropdown placeholder="Select region"
+                     host-uri="ws://city.swim.services"
+                     node="country/us"
+                     lane="country/regions"
+                     key="@region"
+                     type="list">
+
+      </swim-dropdown>
+    </template>
+  </demo-snippet>
+</div>
+
+<div class="vertical-section-container centered">
+  <h3>Swim dropdown using the Swim States web component</h3>
+  <demo-snippet>
+    <template>
+      <swim-dropdown placeholder="Select state"
+                     host-uri="swim-states"
+                     type="list">
+
+      </swim-dropdown>
+    </template>
+  </demo-snippet>
+</div>
+
+<div class="vertical-section-container centered">
+  <h3>Swim Dropdown with custom list</h3>
+
+  <demo-snippet style="margin-bottom: 0;">
+
+    <h4>Create custom Polymer element with unique name such as: my-pets, my-list, my-girlfriends, etc...</h4>
+
+    <template>
+      <!-- COPY this code snippet to use as a template for your custom list. -->
+
+      <dom-module id="my-pets">
         <template>
-          <swim-dropdown placeholder="Select state"
-                         host-uri="swim-states"
-                         type="list">
-
-          </swim-dropdown>
+          <style>
+            :host {
+              display: block;
+            }
+          </style>
+          <!-- OPTIONAL: Dom elements such as this title are not required. -->
+          <h2>[[title]] [[selectedItem]]</h2>
         </template>
-      </demo-snippet>
-    </div>
 
-    <div class="vertical-section-container centered">
-      <h3>Swim Dropdown with Swim uri</h3>
-      <demo-snippet>
+        <script>
+          Polymer({
+
+            /** REQUIRED: A unique id is needed for the 'swim-dropdown' component to access your list. */
+            is: 'my-pets',
+
+            properties: {
+              title: {
+                type: String,
+                value: 'My pets',
+              },
+              selectedItem: {
+                type: String,
+                value: ''
+              }
+            },
+
+            /** REQUIRED: You must name your array function 'getCustomList'.
+             * This is the function that is called inside on the 'swim-dropdown' component. */
+            getCustomList: function () {
+              /** REQUIRED: Your array objects must have a 'name' property.
+               * You may have other properties as well but the 'name' property is essential. */
+              return [
+                {name: 'dog'},
+                {name: 'cat'},
+                {name: 'bird'}
+              ];
+            },
+
+            /** REQUIRED: You must name your select function 'onSelect'.
+             * This is the function that is called inside on the 'swim-dropdown' component.
+             * when an item is selected */
+            onSelect: function (selection) {
+              /** Your functionality goes here */
+              const _self = this;
+              _self.selectedItem = ': ' + selection + ' selected!'
+            }
+
+          });
+        </script>
+      </dom-module>
+
+
+    </template>
+  </demo-snippet>
+
+
+
+
+  <demo-snippet>
+    <template>
+
+      <!-- NOTE: Your custom list must be a sibling of the swim-dropdown
+           contained inside of the same parent div -->
+      <div>
+        <!-- NOTE: Your custom element must be above the swim-dropdown -->
+        <my-pets></my-pets>
+        <!-- NOTE: The host-uri is the name of your custom element. -->
+        <swim-dropdown placeholder="Select pet"
+                       host-uri="my-pets"
+                       type="custom">
+
+        </swim-dropdown>
+      </div>
+
+    </template>
+  </demo-snippet>
+</div>
+
+
+<div class="vertical-section-container centered">
+  <h3>Swim dropdown using external API</h3>
+
+  <demo-snippet style="margin-bottom: 0;">
+
+    <h4>Create Polymer element with AJAX call to external API.</h4>
+
+    <template>
+
+      <dom-module id="top-twenty-celebrities">
         <template>
-          <swim-dropdown placeholder="Select region"
-                         host-uri="ws://city.swim.services"
-                         node="/country/us"
-                         lane="country/regions"
-                         key="@region"
-                         type="list">
-
-          </swim-dropdown>
+          <style>
+            :host {
+              display: block;
+            }
+          </style>
+          <!-- OPTIONAL: Dom elements such as this title are not required. -->
+          <h2>[[title]] [[selectedItem]]</h2>
+          <div style="width: 200px; height: auto;">
+            <img src="{{selectedItemImage}}" style="width: 100%" alt="">
+          </div>
         </template>
-      </demo-snippet>
-    </div>
 
-    <div class="vertical-section-container centered">
-      <h3>Swim Dropdown with custom list</h3>
-      <demo-snippet>
-        <template>
+        <script>
+          Polymer({
 
-          <!-- NOTE: Your custom list must be a sibling of the swim-dropdown and have a unique class -->
-          <my-pets></my-pets>
-          <!-- NOTE: The host-uri attribute is the same as your custom list's unique class -->
-          <swim-dropdown placeholder="Select pet"
-                         host-uri="my-pets"
-                         type="custom">
+            /** REQUIRED: A unique id is needed for the 'swim-dropdown' component to access your list. */
+            is: 'top-twenty-celebrities',
 
-          </swim-dropdown>
+            properties: {
+              title: {
+                type: String,
+                value: 'Top 20 Celebrities',
+              },
+              selectedItem: {
+                type: String,
+                value: ''
+              }
+            },
 
-        </template>
-      </demo-snippet>
-    </div>
+            _getCelebrityList: function () {
 
-  </body>
+            },
+
+            /** REQUIRED: You must name your array function 'getCustomList'.
+             * This is the function that is called inside on the 'swim-dropdown' component. */
+            getCustomList: function () {
+              /** REQUIRED: Your array objects must have a 'name' property.
+               * You may have other properties as well but the 'name' property is essential. */
+              const _self = this;
+              let url = 'https://celebritybucks.com/developers/export/JSON?limit=20';
+              let return_first = function () {
+                _self.temp = null;
+                $.ajax({
+                  'async': false,
+                  'type': "POST",
+                  'global': false,
+                  'dataType': "json",
+                  'url': url,
+                  'data': { 'request': "", 'target': 'arrange_url', 'method': 'method_target' },
+                  'success': function (data) {
+                    _self.temp = data;
+                    _self.selectedList = data['CelebrityValues']
+                  }
+                });
+                return  _self.temp;
+              }();
+
+              return return_first['CelebrityValues'];
+
+
+            },
+            /** REQUIRED: You must name your select function 'onSelect'.
+             * This is the function that is called inside on the 'swim-dropdown' component.
+             * when an item is selected */
+            onSelect: function (selection) {
+              /** Your functionality goes here */
+              const _self = this;
+              _self.selectedItem = ': ' + selection;
+              let celeb = _.find(_self.selectedList, function (obj) {
+                return obj.name === selection;
+              });
+              _self.selectedItemImage = 'http://www.celebritybucks.com/images/celebs/full/' + celeb.celebId  + '.jpg'
+            }
+
+          });
+        </script>
+      </dom-module>
+
+    </template>
+  </demo-snippet>
+
+  <demo-snippet>
+    <template>
+
+      <!-- NOTE: Your custom list must be a sibling of the swim-dropdown
+        contained inside of the same parent div -->
+      <div>
+        <!-- NOTE: Your custom element must be above the swim-dropdown -->
+        <top-twenty-celebrities></top-twenty-celebrities>
+        <!-- NOTE: The host-uri is the name of your custom element. -->
+        <swim-dropdown placeholder="Select celebrity"
+                       host-uri="top-twenty-celebrities"
+                       type="custom">
+
+        </swim-dropdown>
+
+      </div>
+
+
+    </template>
+  </demo-snippet>
+</div>
+
+</body>
 </html>

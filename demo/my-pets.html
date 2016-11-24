@@ -1,5 +1,9 @@
 <link rel="import" href="../../polymer/polymer.html">
 
+<script src="../../lodash/lodash.js"></script>
+<script src="../../jquery/dist/jquery.js"></script>
+
+
 <!--
 `my-pets`
 pets list
@@ -14,23 +18,130 @@ pets list
         display: block;
       }
     </style>
-    <h2>Hello [[prop1]]</h2>
+    <!-- OPTIONAL: Dom elements such as this title are not required. -->
+    <h2>[[title]] [[selectedItem]]</h2>
   </template>
 
   <script>
     Polymer({
 
+      /** REQUIRED: A unique id is needed for the 'swim-dropdown' component to access your list. */
       is: 'my-pets',
 
       properties: {
-        prop1: {
+        title: {
           type: String,
-          value: 'my-pets',
+          value: 'My pets',
+        },
+        selectedItem: {
+          type: String,
+          value: ''
+        },
+        selectedList: {
+          type: Array,
+          value: []
         }
       },
 
+      /** REQUIRED: You must name your array function 'getCustomList'.
+       * This is the function that is called inside on the 'swim-dropdown' component. */
       getCustomList: function () {
-        return [{name: 'dog'}, {name: 'cat'}, {name: 'bird'}];
+        /** REQUIRED: Your array objects must have a 'name' property.
+         * You may have other properties as well but the 'name' property is essential. */
+        return [
+          {name: 'dog'},
+          {name: 'cat'},
+          {name: 'bird'}
+        ];
+      },
+      /** REQUIRED: You must name your select function 'onSelect'.
+       * This is the function that is called inside on the 'swim-dropdown' component.
+       * when an item is selected */
+      onSelect: function (selection) {
+        /** Your functionality goes here */
+        const _self = this;
+        _self.selectedItem = ': ' + selection + ' selected!'
+      }
+
+    });
+  </script>
+</dom-module>
+
+
+<dom-module id="top-twenty-celebrities">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+    </style>
+    <!-- OPTIONAL: Dom elements such as this title are not required. -->
+    <h2>[[title]] [[selectedItem]]</h2>
+    <div style="width: 200px; height: auto;">
+      <img src="{{selectedItemImage}}" style="width: 100%" alt="">
+    </div>
+  </template>
+
+  <script>
+    Polymer({
+
+      /** REQUIRED: A unique id is needed for the 'swim-dropdown' component to access your list. */
+      is: 'top-twenty-celebrities',
+
+      properties: {
+        title: {
+          type: String,
+          value: 'Top 20 Celebrities',
+        },
+        selectedItem: {
+          type: String,
+          value: ''
+        }
+      },
+
+      _getCelebrityList: function () {
+
+      },
+
+      /** REQUIRED: You must name your array function 'getCustomList'.
+       * This is the function that is called inside on the 'swim-dropdown' component. */
+      getCustomList: function () {
+        /** REQUIRED: Your array objects must have a 'name' property.
+         * You may have other properties as well but the 'name' property is essential. */
+        const _self = this;
+        let url = 'https://celebritybucks.com/developers/export/JSON?limit=20';
+        let return_first = function () {
+          _self.temp = null;
+          $.ajax({
+            'async': false,
+            'type': "POST",
+            'global': false,
+            'dataType': "json",
+            'url': url,
+            'data': { 'request': "", 'target': 'arrange_url', 'method': 'method_target' },
+            'success': function (data) {
+              _self.temp = data;
+              _self.selectedList = data['CelebrityValues']
+            }
+          });
+          return  _self.temp;
+        }();
+
+        return return_first['CelebrityValues'];
+
+
+      },
+      /** REQUIRED: You must name your select function 'onSelect'.
+       * This is the function that is called inside on the 'swim-dropdown' component.
+       * when an item is selected */
+      onSelect: function (selection) {
+        /** Your functionality goes here */
+        const _self = this;
+        _self.selectedItem = ': ' + selection;
+        let celeb = _.find(_self.selectedList, function (obj) {
+          return obj.name === selection;
+        });
+        _self.selectedItemImage = 'http://www.celebritybucks.com/images/celebs/full/' + celeb.celebId  + '.jpg'
       }
 
     });
